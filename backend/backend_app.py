@@ -42,6 +42,10 @@ def validate_post_data(data, partial=False):
 
     return errors if errors else None
 
+def find_post_by_id(post_id):
+    return next((post for post in POSTS if post['id'] == post_id), None)
+
+
 @app.route('/api/posts', methods=['GET'])
 def get_posts():
     return jsonify(POSTS)
@@ -64,9 +68,6 @@ def add_post():
             "details": validation_errors
         }), 400
 
-    if validation_errors:
-        return jsonify({"error": "Invalid post data", "details": validation_errors}), 400
-
     new_id = max((post["id"] for post in POSTS), default=0) + 1
 
     created_post = {
@@ -77,6 +78,17 @@ def add_post():
 
     POSTS.append(created_post)
     return jsonify(created_post), 201
+
+@app.route('/api/posts/<int:id>', methods=['DELETE'])
+def delete_post(id):
+    global POSTS
+    post = find_post_by_id(id)
+
+    if post is None:
+        return jsonify({"error": f"Post with id {id} not found"}), 404
+
+    POSTS = [post for post in POSTS if post["id"] != id]
+    return jsonify({"message": f"Post with id {id} has been deleted successfully."}), 200
 
 
 if __name__ == '__main__':
