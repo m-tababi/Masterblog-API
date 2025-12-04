@@ -48,7 +48,7 @@ def find_post_by_id(post_id):
 
 @app.route('/api/posts', methods=['GET'])
 def get_posts():
-    return jsonify(POSTS)
+    return jsonify(POSTS), 200
 
 @app.route('/api/posts', methods=['POST'])
 def add_post():
@@ -79,6 +79,7 @@ def add_post():
     POSTS.append(created_post)
     return jsonify(created_post), 201
 
+
 @app.route('/api/posts/<int:id>', methods=['DELETE'])
 def delete_post(id):
     global POSTS
@@ -87,8 +88,36 @@ def delete_post(id):
     if post is None:
         return jsonify({"error": f"Post with id {id} not found"}), 404
 
-    POSTS = [post for post in POSTS if post["id"] != id]
+    POSTS = [p for p in POSTS if p["id"] != id]
     return jsonify({"message": f"Post with id {id} has been deleted successfully."}), 200
+
+
+@app.route('/api/posts/<int:id>', methods=['PUT'])
+def update_post(id):
+    post = find_post_by_id(id)
+
+    if post is None:
+        return jsonify({"error": f"Post with id {id} not found"}), 404
+
+    updated_data = request.get_json()
+
+    if not updated_data:
+        return jsonify({"error": "No data provided for update"}), 400
+
+    validation_errors = validate_post_data(updated_data, partial=True)
+
+    if validation_errors:
+        return jsonify({
+            "error": "Invalid post data",
+            "details": validation_errors
+        }), 400
+
+    if "title" in updated_data:
+        post["title"] = updated_data["title"]
+    if "content" in updated_data:
+        post["content"] = updated_data["content"]
+
+    return jsonify(post), 200
 
 
 if __name__ == '__main__':
