@@ -113,7 +113,7 @@ def add_post():
     return jsonify(created_post), 201
 
 
-@app.route('/api/posts/<int:id>', methods=['DELETE'])
+@app.route('/api/posts/<int:post_id>', methods=['DELETE'])
 def delete_post(post_id: int):
     """Delete a blog post by id."""
     global POSTS
@@ -131,7 +131,7 @@ def delete_post(post_id: int):
     )
 
 
-@app.route('/api/posts/<int:id>', methods=['PUT'])
+@app.route('/api/posts/<int:post_id>', methods=['PUT'])
 def update_post(post_id: int):
     """Update an existing blog post by id."""
     post = find_post_by_id(post_id)
